@@ -5,6 +5,7 @@ import { db, messages, users, reactions, couples } from '@/db';
 import { requireAuth } from '@/lib/auth';
 import { getPusherServer, EVENTS, getCoupleChannel } from '@/lib/pusher';
 import { LIMITS } from '@/lib/constants';
+import { notifyPartner } from '@/lib/push';
 
 async function getUserCouple(userId: string) {
   const [couple] = await db
@@ -111,6 +112,10 @@ export async function sendMessage(data: {
       message: messageWithSender,
     });
   }
+
+  // Send push notification to partner
+  const preview = data.content || (data.messageType === 'image' ? '📷 Foto' : data.messageType === 'video' ? '🎬 Video' : data.messageType === 'voice' ? '🎤 Spraakbericht' : data.messageType === 'youtube' ? '▶️ YouTube' : '💬 Bericht');
+  notifyPartner(user.id, user.name, preview).catch(console.error);
 
   return messageWithSender;
 }

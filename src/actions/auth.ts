@@ -9,7 +9,7 @@ import { nanoid } from 'nanoid';
 
 export async function loginWithPincode(pincode: string) {
   try {
-    if (!pincode || pincode.length !== 4) {
+    if (!pincode || pincode.length !== 5) {
       return { success: false, error: 'Ongeldige pincode' };
     }
 

@@ -1,9 +1,14 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
-import { pusherServer } from '@/lib/pusher';
+import { getPusherServer } from '@/lib/pusher';
 
 export async function POST(request: NextRequest) {
+  const pusher = getPusherServer();
+  if (!pusher) {
+    return NextResponse.json({ error: 'Pusher not configured' }, { status: 503 });
+  }
+
   const cookieStore = await cookies();
   const token = cookieStore.get('token')?.value;
 
@@ -22,7 +27,7 @@ export async function POST(request: NextRequest) {
 
   // Authorize private channels
   if (channel.startsWith('private-')) {
-    const auth = pusherServer.authorizeChannel(socketId, channel);
+    const auth = pusher.authorizeChannel(socketId, channel);
     return NextResponse.json(auth);
   }
 

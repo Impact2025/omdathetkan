@@ -12,7 +12,7 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export default function LoginPage() {
-  const [pincode, setPincode] = useState(['', '', '', '']);
+  const [pincode, setPincode] = useState(['', '', '', '', '']);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
@@ -56,14 +56,14 @@ export default function LoginPage() {
     setError('');
 
     // Auto-focus next input
-    if (value && index < 3) {
+    if (value && index < 4) {
       inputRefs.current[index + 1]?.focus();
     }
 
     // Auto-submit when complete
-    if (index === 3 && value) {
-      const fullPincode = [...newPincode.slice(0, 3), value.slice(-1)].join('');
-      if (fullPincode.length === 4) {
+    if (index === 4 && value) {
+      const fullPincode = [...newPincode.slice(0, 4), value.slice(-1)].join('');
+      if (fullPincode.length === 5) {
         handleSubmit(fullPincode);
       }
     }
@@ -77,7 +77,7 @@ export default function LoginPage() {
 
   const handleSubmit = async (code?: string) => {
     const fullPincode = code || pincode.join('');
-    if (fullPincode.length !== 4) return;
+    if (fullPincode.length !== 5) return;
 
     setLoading(true);
     setError('');
@@ -88,12 +88,12 @@ export default function LoginPage() {
         router.push('/chat');
       } else {
         setError(result.error || 'Ongeldige pincode');
-        setPincode(['', '', '', '']);
+        setPincode(['', '', '', '', '']);
         inputRefs.current[0]?.focus();
       }
     } catch {
       setError('Er ging iets mis');
-      setPincode(['', '', '', '']);
+      setPincode(['', '', '', '', '']);
       inputRefs.current[0]?.focus();
     } finally {
       setLoading(false);

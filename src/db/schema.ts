@@ -17,7 +17,7 @@ export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: varchar('email', { length: 255 }).unique().notNull(),
   name: varchar('name', { length: 100 }).notNull(),
-  pincode: varchar('pincode', { length: 4 }),
+  pincode: varchar('pincode', { length: 6 }),
   avatarUrl: text('avatar_url'),
   partnerId: uuid('partner_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -116,6 +116,16 @@ export const magicLinks = pgTable('magic_links', {
   token: varchar('token', { length: 64 }).unique().notNull(),
   expiresAt: timestamp('expires_at').notNull(),
   usedAt: timestamp('used_at'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+});
+
+// Push subscriptions table
+export const pushSubscriptions = pgTable('push_subscriptions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').references(() => users.id).notNull(),
+  endpoint: text('endpoint').notNull(),
+  p256dh: text('p256dh').notNull(),
+  auth: text('auth').notNull(),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 

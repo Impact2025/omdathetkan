@@ -3,6 +3,8 @@ import { getSession } from '@/lib/auth';
 import { getCouple } from '@/actions/couple';
 import { SettingsClient } from '@/components/SettingsClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SettingsPage() {
   const session = await getSession();
 

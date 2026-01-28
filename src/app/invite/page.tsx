@@ -3,6 +3,8 @@ import { getSession } from '@/lib/auth';
 import { getCouple } from '@/actions/couple';
 import { InviteClient } from '@/components/InviteClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function InvitePage() {
   const session = await getSession();
 

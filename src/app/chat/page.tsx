@@ -4,6 +4,8 @@ import { getCouple } from '@/actions/couple';
 import { getMessages } from '@/actions/messages';
 import { ChatClient } from '@/components/chat/ChatClient';
 
+export const dynamic = 'force-dynamic';
+
 export default async function ChatPage() {
   const session = await getSession();
 
