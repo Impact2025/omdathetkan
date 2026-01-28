@@ -69,7 +69,7 @@ export async function getMessages(cursor?: string, limit = LIMITS.MESSAGES_PER_P
 
 export async function sendMessage(data: {
   content?: string;
-  messageType?: 'text' | 'emoji' | 'sticker' | 'image' | 'video' | 'voice';
+  messageType?: 'text' | 'emoji' | 'sticker' | 'image' | 'video' | 'voice' | 'youtube';
   mediaUrl?: string;
 }) {
   const { user } = await requireAuth();
