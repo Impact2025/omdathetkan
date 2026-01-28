@@ -118,7 +118,7 @@ export default function LoginPage() {
             >
               <Image
                 src="/logo.png"
-                alt="PureLiefde"
+                alt="Logo"
                 fill
                 className="object-contain"
                 priority
