@@ -7,7 +7,10 @@ import { sendMessage, markAsRead, sendTypingIndicator } from '@/actions/messages
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 import { ChatHeader } from './ChatHeader';
+import { usePresence } from '@/hooks/usePresence';
 import type { User, Message, Reaction } from '@/db/schema';
+
+const ONLINE_THRESHOLD = 2 * 60 * 1000; // 2 minutes
 
 interface MessageWithSender extends Message {
   sender: Pick<User, 'id' | 'name' | 'avatarUrl'>;
@@ -29,9 +32,20 @@ interface ChatClientProps {
 export function ChatClient({ initialMessages, currentUser, couple }: ChatClientProps) {
   const [messages, setMessages] = useState<MessageWithSender[]>(initialMessages);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
-  const [isPartnerOnline, setIsPartnerOnline] = useState(false);
+
+  // Determine initial online status based on lastSeen
+  const getInitialOnlineStatus = () => {
+    if (!couple.partner.lastSeen) return false;
+    const lastSeenTime = new Date(couple.partner.lastSeen).getTime();
+    return Date.now() - lastSeenTime < ONLINE_THRESHOLD;
+  };
+
+  const [isPartnerOnline, setIsPartnerOnline] = useState(getInitialOnlineStatus);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const typingTimeoutRef = useRef<NodeJS.Timeout>();
+
+  // Use presence hook to send heartbeats
+  usePresence({ coupleId: couple.id, userId: currentUser.id });
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -44,6 +58,11 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
   // Subscribe to Pusher events
   useEffect(() => {
     const pusher = getPusherClient();
+    if (!pusher) {
+      // Pusher not configured - realtime features disabled
+      return;
+    }
+
     const channel = pusher.subscribe(getCoupleChannel(couple.id));
 
     channel.bind(EVENTS.MESSAGE_NEW, (data: { message: MessageWithSender }) => {
@@ -83,6 +102,12 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
       }
     });
 
+    channel.bind(EVENTS.PRESENCE_UPDATE, (data: { userId: string; isOnline: boolean }) => {
+      if (data.userId !== currentUser.id) {
+        setIsPartnerOnline(data.isOnline);
+      }
+    });
+
     return () => {
       channel.unbind_all();
       pusher.unsubscribe(getCoupleChannel(couple.id));
@@ -99,12 +124,21 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
     }
   };
 
-  const handleSendMedia = async (mediaUrl: string, type: 'image' | 'video' | 'voice') => {
+  const handleSendMedia = async (mediaUrl: string, type: 'image' | 'video' | 'voice' | 'youtube') => {
     try {
       const newMessage = await sendMessage({ mediaUrl, messageType: type });
       setMessages((prev) => [...prev, newMessage]);
     } catch (error) {
       console.error('Failed to send media:', error);
+    }
+  };
+
+  const handleSendSticker = async (emoji: string) => {
+    try {
+      const newMessage = await sendMessage({ content: emoji, messageType: 'sticker' });
+      setMessages((prev) => [...prev, newMessage]);
+    } catch (error) {
+      console.error('Failed to send sticker:', error);
     }
   };
 
@@ -155,6 +189,7 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
       <MessageInput
         onSendMessage={handleSendMessage}
         onSendMedia={handleSendMedia}
+        onSendSticker={handleSendSticker}
         onTyping={handleTyping}
       />
     </div>

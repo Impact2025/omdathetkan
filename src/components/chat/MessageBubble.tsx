@@ -27,6 +27,18 @@ export function MessageBubble({ message, isSent }: MessageBubbleProps) {
       case 'emoji':
         return <span className="text-5xl">{message.content}</span>;
 
+      case 'sticker':
+        return (
+          <motion.span
+            className="text-7xl block"
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 500, damping: 15 }}
+          >
+            {message.content}
+          </motion.span>
+        );
+
       case 'image':
         return (
           <>
@@ -96,12 +108,25 @@ export function MessageBubble({ message, isSent }: MessageBubbleProps) {
           />
         );
 
+      case 'youtube':
+        return (
+          <div className="relative w-72 aspect-video rounded-lg overflow-hidden bg-black">
+            <iframe
+              src={`https://www.youtube.com/embed/${message.mediaUrl}`}
+              title="YouTube video"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="absolute inset-0 w-full h-full"
+            />
+          </div>
+        );
+
       default:
         return <p className="whitespace-pre-wrap break-words">{message.content}</p>;
     }
   };
 
-  const isMediaMessage = ['image', 'video', 'emoji'].includes(message.messageType);
+  const isMediaMessage = ['image', 'video', 'emoji', 'sticker', 'youtube'].includes(message.messageType);
 
   return (
     <motion.div
