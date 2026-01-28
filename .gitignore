@@ -2,17 +2,16 @@
 node_modules/
 .pnpm-store/
 
-# Build outputs
-dist/
+# Next.js
+.next/
+out/
 build/
-.output/
-.wrangler/
+dist/
 
 # Environment files
 .env
 .env.local
 .env.*.local
-.dev.vars
 
 # IDE
 .idea/
@@ -25,14 +24,19 @@ build/
 Thumbs.db
 
 # Logs
-logs/
 *.log
 npm-debug.log*
-pnpm-debug.log*
 
-# Testing
-coverage/
+# Vercel
+.vercel
 
-# Misc
+# TypeScript
 *.tsbuildinfo
-.turbo/
+next-env.d.ts
+
+# Drizzle
+drizzle/*.sql
+
+# Old Cloudflare stuff
+.wrangler/
+apps/

@@ -1,46 +1,7 @@
 {
   "permissions": {
     "allow": [
-      "Bash(pnpm install)",
-      "Bash(npm install -g pnpm)",
-      "Bash(pnpm approve-builds:*)",
-      "Bash(pnpm typecheck:*)",
-      "Bash(pnpm install:*)",
-      "Bash(timeout 10 pnpm dev:*)",
-      "Bash(taskkill:*)",
-      "Bash(pkill:*)",
-      "Bash(pnpm dev)",
-      "Bash(netstat:*)",
-      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_rp6wvReN5huK@ep-green-firefly-agbet4u5-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require\" pnpm db:push:*)",
-      "Bash(PGPASSWORD=\"npg_rp6wvReN5huK\" psql \"postgresql://neondb_owner@ep-green-firefly-agbet4u5-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require\" -c \"\\\\dt\")",
-      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_rp6wvReN5huK@ep-green-firefly-agbet4u5-pooler.c-2.eu-central-1.aws.neon.tech/neondb?sslmode=require\" npx tsx:*)",
-      "Bash(find:*)",
-      "Bash(npx tsc:*)",
-      "Bash(node_modules/.bin/tsc:*)",
-      "Bash(ls:*)",
-      "Bash(node ./node_modules/.pnpm/typescript@5.9.3/node_modules/typescript/bin/tsc:*)",
-      "Bash(pnpm --filter @pureliefde/web build:*)",
-      "Bash(findstr:*)",
-      "Bash(timeout /t 5 /nobreak)",
-      "Bash(pnpm db:push:*)",
-      "Bash(pnpm --filter @pureliefde/api db:push:*)",
-      "Bash(pnpm add:*)",
-      "Bash(npx tsx:*)",
-      "Bash(npx dotenv:*)",
-      "Bash(pnpm --filter @pureliefde/api dev:*)",
-      "Bash(ping:*)",
-      "Bash(ss:*)",
-      "Bash(lsof:*)",
-      "Bash(tasklist:*)",
-      "Bash(pnpm run dev)",
-      "Bash(pnpm dev:api:*)",
-      "Bash(pnpm lint:*)",
-      "Bash(pnpm build:*)",
-      "Bash(if exist \"apps\\\\api\\\\.wrangler\\\\state\\\\v3\\\\r2\" rmdir /s /q \"apps\\\\api\\\\.wrangler\\\\state\\\\v3\\\\r2\")",
-      "Bash(del \"apps\\\\api\\\\scripts\\\\clear-data.ts\")",
-      "Bash(git init:*)",
-      "Bash(git remote add:*)",
-      "Bash(git add:*)"
+      "Bash(npx create-next-app:*)"
     ]
   }
 }
