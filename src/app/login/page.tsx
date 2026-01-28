@@ -114,7 +114,7 @@ export default function LoginPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', delay: 0.2 }}
-              className="w-32 h-32 mx-auto mb-6 relative"
+              className="w-48 h-48 mx-auto mb-6 relative"
             >
               <Image
                 src="/logo.png"
