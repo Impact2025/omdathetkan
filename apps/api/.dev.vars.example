@@ -1,0 +1,6 @@
+# Copy this file to .dev.vars and fill in your values
+# These are used by wrangler for local development
+
+DATABASE_URL=postgresql://user:password@ep-xxx.region.aws.neon.tech/neondb?sslmode=require
+JWT_SECRET=your-super-secret-jwt-key-here-make-it-long
+R2_PUBLIC_URL=https://pub-xxx.r2.dev
