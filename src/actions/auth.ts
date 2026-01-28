@@ -8,27 +8,32 @@ import { createToken } from '@/lib/auth';
 import { nanoid } from 'nanoid';
 
 export async function loginWithPincode(pincode: string) {
-  if (!pincode || pincode.length !== 4) {
-    return { success: false, error: 'Ongeldige pincode' };
+  try {
+    if (!pincode || pincode.length !== 4) {
+      return { success: false, error: 'Ongeldige pincode' };
+    }
+
+    // Find user with this pincode
+    const [user] = await db.select().from(users).where(eq(users.pincode, pincode));
+
+    if (!user) {
+      return { success: false, error: 'Ongeldige pincode' };
+    }
+
+    const token = await createToken(user.id, user.email);
+    const cookieStore = await cookies();
+    cookieStore.set('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'lax',
+      maxAge: 60 * 60 * 24 * 30, // 30 days
+    });
+
+    return { success: true };
+  } catch (error) {
+    console.error('Login error:', error);
+    return { success: false, error: 'Login mislukt: ' + (error instanceof Error ? error.message : 'Onbekende fout') };
   }
-
-  // Find user with this pincode
-  const [user] = await db.select().from(users).where(eq(users.pincode, pincode));
-
-  if (!user) {
-    return { success: false, error: 'Ongeldige pincode' };
-  }
-
-  const token = await createToken(user.id, user.email);
-  const cookieStore = await cookies();
-  cookieStore.set('token', token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'lax',
-    maxAge: 60 * 60 * 24 * 30, // 30 days
-  });
-
-  return { success: true };
 }
 
 export async function login(email: string) {
