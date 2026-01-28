@@ -5,6 +5,11 @@ import { requireAuth } from '@/lib/auth';
 import { LIMITS, ALLOWED_FILE_TYPES } from '@/lib/constants';
 
 export async function uploadFile(formData: FormData) {
+  // Check if Vercel Blob is configured
+  if (!process.env.BLOB_READ_WRITE_TOKEN) {
+    throw new Error('Foto uploads zijn nog niet geconfigureerd. Voeg BLOB_READ_WRITE_TOKEN toe aan je environment variables.');
+  }
+
   const { user } = await requireAuth();
 
   const file = formData.get('file') as File;

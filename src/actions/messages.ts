@@ -3,7 +3,7 @@
 import { eq, or, desc, lt, and } from 'drizzle-orm';
 import { db, messages, users, reactions, couples } from '@/db';
 import { requireAuth } from '@/lib/auth';
-import { pusherServer, EVENTS, getCoupleChannel } from '@/lib/pusher';
+import { getPusherServer, EVENTS, getCoupleChannel } from '@/lib/pusher';
 import { LIMITS } from '@/lib/constants';
 
 async function getUserCouple(userId: string) {
@@ -105,9 +105,12 @@ export async function sendMessage(data: {
   };
 
   // Broadcast via Pusher
-  await pusherServer.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_NEW, {
-    message: messageWithSender,
-  });
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_NEW, {
+      message: messageWithSender,
+    });
+  }
 
   return messageWithSender;
 }
@@ -127,10 +130,13 @@ export async function markAsRead(messageId: string) {
 
   await db.update(messages).set({ readAt: new Date() }).where(eq(messages.id, messageId));
 
-  await pusherServer.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_READ, {
-    messageId,
-    readAt: new Date(),
-  });
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_READ, {
+      messageId,
+      readAt: new Date(),
+    });
+  }
 }
 
 export async function addReaction(messageId: string, emoji: string) {
@@ -155,10 +161,13 @@ export async function addReaction(messageId: string, emoji: string) {
     .values({ messageId, userId: user.id, emoji })
     .returning();
 
-  await pusherServer.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_REACTION, {
-    messageId,
-    reaction,
-  });
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_REACTION, {
+      messageId,
+      reaction,
+    });
+  }
 
   return { reaction };
 }
@@ -169,9 +178,42 @@ export async function sendTypingIndicator(isTyping: boolean) {
 
   if (!couple) return;
 
-  await pusherServer.trigger(
-    getCoupleChannel(couple.id),
-    isTyping ? EVENTS.TYPING_START : EVENTS.TYPING_STOP,
-    { userId: user.id }
-  );
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger(
+      getCoupleChannel(couple.id),
+      isTyping ? EVENTS.TYPING_START : EVENTS.TYPING_STOP,
+      { userId: user.id }
+    );
+  }
+}
+
+export async function updatePresence() {
+  const { user } = await requireAuth();
+  const couple = await getUserCouple(user.id);
+
+  // Update lastSeen timestamp
+  await db.update(users).set({ lastSeen: new Date() }).where(eq(users.id, user.id));
+
+  if (!couple) return;
+
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger(getCoupleChannel(couple.id), EVENTS.PRESENCE_UPDATE, {
+      userId: user.id,
+      isOnline: true,
+      lastSeen: new Date().toISOString(),
+    });
+  }
+}
+
+export async function sendOfflinePresence(userId: string, coupleId: string) {
+  const pusher = getPusherServer();
+  if (pusher) {
+    await pusher.trigger(getCoupleChannel(coupleId), EVENTS.PRESENCE_UPDATE, {
+      userId,
+      isOnline: false,
+      lastSeen: new Date().toISOString(),
+    });
+  }
 }
