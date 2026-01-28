@@ -16,6 +16,7 @@ export const users = pgTable('users', {
   id: uuid('id').primaryKey().defaultRandom(),
   email: varchar('email', { length: 255 }).unique().notNull(),
   name: varchar('name', { length: 100 }).notNull(),
+  pincode: varchar('pincode', { length: 4 }),
   avatarUrl: text('avatar_url'),
   partnerId: uuid('partner_id'),
   createdAt: timestamp('created_at').defaultNow().notNull(),

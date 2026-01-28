@@ -1,43 +1,81 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
-import { login } from '@/actions/auth';
+import { loginWithPincode } from '@/actions/auth';
 
 export default function LoginPage() {
-  const [email, setEmail] = useState('');
+  const [pincode, setPincode] = useState(['', '', '', '']);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const router = useRouter();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  useEffect(() => {
+    inputRefs.current[0]?.focus();
+  }, []);
+
+  const handleChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return; // Only digits
+
+    const newPincode = [...pincode];
+    newPincode[index] = value.slice(-1); // Only last digit
+    setPincode(newPincode);
+    setError('');
+
+    // Auto-focus next input
+    if (value && index < 3) {
+      inputRefs.current[index + 1]?.focus();
+    }
+
+    // Auto-submit when complete
+    if (index === 3 && value) {
+      const fullPincode = [...newPincode.slice(0, 3), value.slice(-1)].join('');
+      if (fullPincode.length === 4) {
+        handleSubmit(fullPincode);
+      }
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !pincode[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const handleSubmit = async (code?: string) => {
+    const fullPincode = code || pincode.join('');
+    if (fullPincode.length !== 4) return;
+
     setLoading(true);
     setError('');
-    setMessage('');
 
     try {
-      const result = await login(email);
-      if (result.directLogin) {
+      const result = await loginWithPincode(fullPincode);
+      if (result.success) {
         router.push('/chat');
       } else {
-        setMessage(result.message || 'Check je email!');
+        setError(result.error || 'Ongeldige pincode');
+        setPincode(['', '', '', '']);
+        inputRefs.current[0]?.focus();
       }
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Er ging iets mis');
+    } catch {
+      setError('Er ging iets mis');
+      setPincode(['', '', '', '']);
+      inputRefs.current[0]?.focus();
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-pink-50 via-white to-rose-50">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="w-full max-w-md"
+        className="w-full max-w-sm"
       >
         <div className="glass rounded-3xl p-8">
           {/* Logo */}
@@ -46,80 +84,63 @@ export default function LoginPage() {
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: 'spring', delay: 0.2 }}
-              className="w-20 h-20 mx-auto mb-4 bg-gradient-to-br from-primary-500 to-secondary-500 rounded-full flex items-center justify-center"
+              className="w-32 h-32 mx-auto mb-6 relative"
             >
-              <span className="text-4xl">💕</span>
+              <Image
+                src="/logo.png"
+                alt="PureLiefde"
+                fill
+                className="object-contain"
+                priority
+              />
             </motion.div>
             <h1 className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-secondary-600 bg-clip-text text-transparent">
               PureLiefde
             </h1>
-            <p className="text-gray-500 mt-2">Jullie privé chat</p>
+            <p className="text-gray-500 mt-2">Voer je pincode in</p>
           </div>
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Je email adres"
-                className="input"
-                required
+          {/* Pincode inputs */}
+          <div className="flex justify-center gap-3 mb-6">
+            {pincode.map((digit, index) => (
+              <motion.input
+                key={index}
+                ref={(el) => { inputRefs.current[index] = el; }}
+                type="text"
+                inputMode="numeric"
+                maxLength={1}
+                value={digit}
+                onChange={(e) => handleChange(index, e.target.value)}
+                onKeyDown={(e) => handleKeyDown(index, e)}
                 disabled={loading}
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3 + index * 0.1 }}
+                className={`w-14 h-14 text-center text-2xl font-bold rounded-xl border-2
+                  ${error ? 'border-red-300 bg-red-50' : 'border-gray-200 bg-white'}
+                  focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500
+                  transition-all duration-200 disabled:opacity-50`}
               />
-            </div>
+            ))}
+          </div>
 
-            {error && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-red-500 text-sm text-center"
-              >
-                {error}
-              </motion.p>
-            )}
-
-            {message && (
-              <motion.p
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-green-600 text-sm text-center"
-              >
-                {message}
-              </motion.p>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading || !email}
-              className="btn-primary w-full"
+          {/* Error message */}
+          {error && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="text-red-500 text-sm text-center mb-4"
             >
-              {loading ? (
-                <span className="flex items-center justify-center gap-2">
-                  <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                    <circle
-                      className="opacity-25"
-                      cx="12"
-                      cy="12"
-                      r="10"
-                      stroke="currentColor"
-                      strokeWidth="4"
-                      fill="none"
-                    />
-                    <path
-                      className="opacity-75"
-                      fill="currentColor"
-                      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    />
-                  </svg>
-                  Bezig...
-                </span>
-              ) : (
-                'Inloggen'
-              )}
-            </button>
-          </form>
+              {error}
+            </motion.p>
+          )}
+
+          {/* Loading indicator */}
+          {loading && (
+            <div className="flex justify-center">
+              <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
         </div>
       </motion.div>
     </div>
