@@ -10,6 +10,7 @@ export const messageTypeEnum = pgEnum('message_type', [
   'video',
   'voice',
   'youtube',
+  'spotify',
 ]);
 
 // Users table

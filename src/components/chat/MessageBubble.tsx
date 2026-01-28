@@ -121,12 +121,27 @@ export function MessageBubble({ message, isSent }: MessageBubbleProps) {
           </div>
         );
 
+      case 'spotify':
+        return (
+          <div className="w-72 rounded-lg overflow-hidden">
+            <iframe
+              src={`https://open.spotify.com/embed/track/${message.mediaUrl}?utm_source=generator&theme=0`}
+              width="100%"
+              height="152"
+              frameBorder="0"
+              allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"
+              loading="lazy"
+              title="Spotify track"
+            />
+          </div>
+        );
+
       default:
         return <p className="whitespace-pre-wrap break-words">{message.content}</p>;
     }
   };
 
-  const isMediaMessage = ['image', 'video', 'emoji', 'sticker', 'youtube'].includes(message.messageType);
+  const isMediaMessage = ['image', 'video', 'emoji', 'sticker', 'youtube', 'spotify'].includes(message.messageType);
 
   return (
     <motion.div

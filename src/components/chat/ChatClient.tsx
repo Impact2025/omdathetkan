@@ -124,7 +124,7 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
     }
   };
 
-  const handleSendMedia = async (mediaUrl: string, type: 'image' | 'video' | 'voice' | 'youtube') => {
+  const handleSendMedia = async (mediaUrl: string, type: 'image' | 'video' | 'voice' | 'youtube' | 'spotify') => {
     try {
       const newMessage = await sendMessage({ mediaUrl, messageType: type });
       setMessages((prev) => [...prev, newMessage]);

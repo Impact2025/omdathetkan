@@ -70,7 +70,7 @@ export async function getMessages(cursor?: string, limit = LIMITS.MESSAGES_PER_P
 
 export async function sendMessage(data: {
   content?: string;
-  messageType?: 'text' | 'emoji' | 'sticker' | 'image' | 'video' | 'voice' | 'youtube';
+  messageType?: 'text' | 'emoji' | 'sticker' | 'image' | 'video' | 'voice' | 'youtube' | 'spotify';
   mediaUrl?: string;
 }) {
   const { user } = await requireAuth();
@@ -114,7 +114,7 @@ export async function sendMessage(data: {
   }
 
   // Send push notification to partner
-  const preview = data.content || (data.messageType === 'image' ? '📷 Foto' : data.messageType === 'video' ? '🎬 Video' : data.messageType === 'voice' ? '🎤 Spraakbericht' : data.messageType === 'youtube' ? '▶️ YouTube' : '💬 Bericht');
+  const preview = data.content || (data.messageType === 'image' ? '📷 Foto' : data.messageType === 'video' ? '🎬 Video' : data.messageType === 'voice' ? '🎤 Spraakbericht' : data.messageType === 'youtube' ? '▶️ YouTube' : data.messageType === 'spotify' ? '🎵 Spotify' : '💬 Bericht');
   notifyPartner(user.id, user.name, preview).catch(console.error);
 
   return messageWithSender;
