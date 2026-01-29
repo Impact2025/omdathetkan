@@ -8,6 +8,7 @@ import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 import { ChatHeader } from './ChatHeader';
 import { usePresence } from '@/hooks/usePresence';
+import { useAutoLogout } from '@/hooks/useAutoLogout';
 import type { User, Message, Reaction } from '@/db/schema';
 
 const ONLINE_THRESHOLD = 2 * 60 * 1000; // 2 minutes
@@ -46,6 +47,12 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
 
   // Use presence hook to send heartbeats
   usePresence({ coupleId: couple.id, userId: currentUser.id });
+
+  // Auto-logout for Vincent after 60 seconds of inactivity
+  useAutoLogout({
+    timeoutSeconds: 60,
+    enabled: currentUser.email === 'vincent@pureliefde.nl',
+  });
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
