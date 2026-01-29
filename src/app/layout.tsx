@@ -6,13 +6,13 @@ import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistratio
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'PureLiefde',
+  title: 'PUUR',
   description: 'Private messaging app voor koppels',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'PureLiefde',
+    title: 'PUUR',
   },
 };
 
