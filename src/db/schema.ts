@@ -64,6 +64,7 @@ export const messages = pgTable('messages', {
   messageType: messageTypeEnum('message_type').default('text').notNull(),
   mediaUrl: text('media_url'),
   readAt: timestamp('read_at'),
+  archivedAt: timestamp('archived_at'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
@@ -130,6 +131,31 @@ export const pushSubscriptions = pgTable('push_subscriptions', {
   createdAt: timestamp('created_at').defaultNow().notNull(),
 });
 
+// Date events table
+export const dateEvents = pgTable('date_events', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  coupleId: uuid('couple_id').references(() => couples.id).notNull(),
+  title: varchar('title', { length: 200 }).notNull(),
+  description: text('description'),
+  date: date('date').notNull(),
+  time: varchar('time', { length: 5 }), // "HH:mm" format, optional
+  location: varchar('location', { length: 300 }),
+  createdById: uuid('created_by_id').references(() => users.id).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+});
+
+export const dateEventsRelations = relations(dateEvents, ({ one }) => ({
+  couple: one(couples, {
+    fields: [dateEvents.coupleId],
+    references: [couples.id],
+  }),
+  createdBy: one(users, {
+    fields: [dateEvents.createdById],
+    references: [users.id],
+  }),
+}));
+
 // Types
 export type User = typeof users.$inferSelect;
 export type NewUser = typeof users.$inferInsert;
@@ -137,3 +163,5 @@ export type Message = typeof messages.$inferSelect;
 export type NewMessage = typeof messages.$inferInsert;
 export type Couple = typeof couples.$inferSelect;
 export type Reaction = typeof reactions.$inferSelect;
+export type DateEvent = typeof dateEvents.$inferSelect;
+export type NewDateEvent = typeof dateEvents.$inferInsert;

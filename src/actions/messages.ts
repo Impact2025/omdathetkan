@@ -1,6 +1,6 @@
 'use server';
 
-import { eq, or, desc, lt, and } from 'drizzle-orm';
+import { eq, or, desc, lt, and, isNull } from 'drizzle-orm';
 import { db, messages, users, reactions, couples } from '@/db';
 import { requireAuth } from '@/lib/auth';
 import { getPusherServer, EVENTS, getCoupleChannel } from '@/lib/pusher';
@@ -30,14 +30,21 @@ export async function getMessages(cursor?: string, limit = LIMITS.MESSAGES_PER_P
     messagesList = await db
       .select()
       .from(messages)
-      .where(and(eq(messages.coupleId, couple.id), lt(messages.createdAt, new Date(cursor))))
+      .where(and(
+        eq(messages.coupleId, couple.id),
+        lt(messages.createdAt, new Date(cursor)),
+        isNull(messages.archivedAt)
+      ))
       .orderBy(desc(messages.createdAt))
       .limit(queryLimit + 1);
   } else {
     messagesList = await db
       .select()
       .from(messages)
-      .where(eq(messages.coupleId, couple.id))
+      .where(and(
+        eq(messages.coupleId, couple.id),
+        isNull(messages.archivedAt)
+      ))
       .orderBy(desc(messages.createdAt))
       .limit(queryLimit + 1);
   }

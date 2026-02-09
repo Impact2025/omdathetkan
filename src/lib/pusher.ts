@@ -62,6 +62,9 @@ export const EVENTS = {
   TYPING_START: 'typing:start',
   TYPING_STOP: 'typing:stop',
   PRESENCE_UPDATE: 'presence:update',
+  DATE_NEW: 'date:new',
+  DATE_UPDATE: 'date:update',
+  DATE_DELETE: 'date:delete',
 } as const;
 
 // Channel naming
