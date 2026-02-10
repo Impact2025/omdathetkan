@@ -1,6 +1,6 @@
 'use server';
 
-import { eq, or, desc, lt, and, isNull } from 'drizzle-orm';
+import { eq, or, desc, lt, and, isNull, isNotNull } from 'drizzle-orm';
 import { db, messages, users, reactions, couples } from '@/db';
 import { requireAuth } from '@/lib/auth';
 import { getPusherServer, EVENTS, getCoupleChannel } from '@/lib/pusher';
@@ -228,4 +228,70 @@ export async function sendOfflinePresence(userId: string, coupleId: string) {
       lastSeen: new Date().toISOString(),
     });
   }
+}
+
+export async function getArchivedMessages(cursor?: string, limit = LIMITS.MESSAGES_PER_PAGE) {
+  const { user } = await requireAuth();
+
+  // Only Vincent can access archived messages
+  if (user.email !== 'vincent@pureliefde.nl') {
+    throw new Error('Geen toegang tot archief');
+  }
+
+  const couple = await getUserCouple(user.id);
+
+  if (!couple) {
+    return { messages: [], nextCursor: null };
+  }
+
+  const queryLimit = Math.min(limit, LIMITS.MESSAGES_PER_PAGE);
+
+  let messagesList;
+  if (cursor) {
+    messagesList = await db
+      .select()
+      .from(messages)
+      .where(and(
+        eq(messages.coupleId, couple.id),
+        lt(messages.createdAt, new Date(cursor)),
+        isNotNull(messages.archivedAt)
+      ))
+      .orderBy(desc(messages.createdAt))
+      .limit(queryLimit + 1);
+  } else {
+    messagesList = await db
+      .select()
+      .from(messages)
+      .where(and(
+        eq(messages.coupleId, couple.id),
+        isNotNull(messages.archivedAt)
+      ))
+      .orderBy(desc(messages.createdAt))
+      .limit(queryLimit + 1);
+  }
+
+  const hasMore = messagesList.length > queryLimit;
+  if (hasMore) messagesList.pop();
+
+  // Get sender info and reactions
+  const messagesWithDetails = await Promise.all(
+    messagesList.map(async (message) => {
+      const [sender] = await db
+        .select({ id: users.id, name: users.name, avatarUrl: users.avatarUrl })
+        .from(users)
+        .where(eq(users.id, message.senderId));
+
+      const messageReactions = await db
+        .select()
+        .from(reactions)
+        .where(eq(reactions.messageId, message.id));
+
+      return { ...message, sender, reactions: messageReactions };
+    })
+  );
+
+  return {
+    messages: messagesWithDetails.reverse(),
+    nextCursor: hasMore ? messagesList[messagesList.length - 1].createdAt.toISOString() : null,
+  };
 }

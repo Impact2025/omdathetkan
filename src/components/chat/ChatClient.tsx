@@ -159,6 +159,7 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
         partner={couple.partner}
         isOnline={isPartnerOnline}
         anniversaryDate={couple.anniversaryDate}
+        currentUserEmail={currentUser.email}
       />
 
       {/* Messages */}

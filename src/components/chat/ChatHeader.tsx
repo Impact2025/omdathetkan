@@ -10,9 +10,10 @@ interface ChatHeaderProps {
   partner: Pick<User, 'id' | 'name' | 'avatarUrl' | 'lastSeen'>;
   isOnline: boolean;
   anniversaryDate: string | null;
+  currentUserEmail?: string;
 }
 
-export function ChatHeader({ partner, isOnline, anniversaryDate }: ChatHeaderProps) {
+export function ChatHeader({ partner, isOnline, anniversaryDate, currentUserEmail }: ChatHeaderProps) {
   const daysTogether = anniversaryDate
     ? differenceInDays(new Date(), new Date(anniversaryDate))
     : null;
@@ -74,6 +75,19 @@ export function ChatHeader({ partner, isOnline, anniversaryDate }: ChatHeaderPro
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </Link>
+
+        {/* Archive (only for Vincent) */}
+        {currentUserEmail === 'vincent@pureliefde.nl' && (
+          <Link
+            href="/archive"
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            title="Archief"
+          >
+            <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
+            </svg>
+          </Link>
+        )}
 
         {/* Settings */}
         <Link
