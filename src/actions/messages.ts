@@ -219,6 +219,37 @@ export async function updatePresence() {
   }
 }
 
+export async function getSpotifyMessages() {
+  const { user } = await requireAuth();
+  const couple = await getUserCouple(user.id);
+
+  if (!couple) {
+    return { tracks: [] };
+  }
+
+  const tracks = await db
+    .select()
+    .from(messages)
+    .where(and(
+      eq(messages.coupleId, couple.id),
+      eq(messages.messageType, 'spotify'),
+      isNull(messages.archivedAt)
+    ))
+    .orderBy(desc(messages.createdAt));
+
+  const tracksWithSender = await Promise.all(
+    tracks.map(async (message) => {
+      const [sender] = await db
+        .select({ id: users.id, name: users.name })
+        .from(users)
+        .where(eq(users.id, message.senderId));
+      return { ...message, sender };
+    })
+  );
+
+  return { tracks: tracksWithSender };
+}
+
 export async function sendOfflinePresence(userId: string, coupleId: string) {
   const pusher = getPusherServer();
   if (pusher) {

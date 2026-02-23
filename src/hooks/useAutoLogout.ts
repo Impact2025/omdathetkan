@@ -13,9 +13,8 @@ export function useAutoLogout({ timeoutSeconds, enabled }: UseAutoLogoutOptions)
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const logout = useCallback(async () => {
-    // Call the logout API
     await fetch('/api/logout', { method: 'POST' });
-    router.push('/login');
+    router.push('/gesloten');
   }, [router]);
 
   const resetTimer = useCallback(() => {
