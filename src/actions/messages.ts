@@ -232,8 +232,7 @@ export async function getSpotifyMessages() {
     .from(messages)
     .where(and(
       eq(messages.coupleId, couple.id),
-      eq(messages.messageType, 'spotify'),
-      isNull(messages.archivedAt)
+      eq(messages.messageType, 'spotify')
     ))
     .orderBy(desc(messages.createdAt));
 
