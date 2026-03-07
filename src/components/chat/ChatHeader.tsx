@@ -10,10 +10,9 @@ interface ChatHeaderProps {
   partner: Pick<User, 'id' | 'name' | 'avatarUrl' | 'lastSeen'>;
   isOnline: boolean;
   anniversaryDate: string | null;
-  currentUserEmail?: string;
 }
 
-export function ChatHeader({ partner, isOnline, anniversaryDate, currentUserEmail }: ChatHeaderProps) {
+export function ChatHeader({ partner, isOnline, anniversaryDate }: ChatHeaderProps) {
   const daysTogether = anniversaryDate
     ? differenceInDays(new Date(), new Date(anniversaryDate))
     : null;
@@ -66,17 +65,6 @@ export function ChatHeader({ partner, isOnline, anniversaryDate, currentUserEmai
           </motion.div>
         )}
 
-        {/* Playlist */}
-        <Link
-          href="/playlist"
-          className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-          title="Playlist"
-        >
-          <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-          </svg>
-        </Link>
-
         {/* Dateplanner */}
         <Link
           href="/dates"
@@ -86,19 +74,6 @@ export function ChatHeader({ partner, isOnline, anniversaryDate, currentUserEmai
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
           </svg>
         </Link>
-
-        {/* Archive (only for Vincent) */}
-        {currentUserEmail === 'vincent@pureliefde.nl' && (
-          <Link
-            href="/archive"
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            title="Archief"
-          >
-            <svg className="w-5 h-5 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-            </svg>
-          </Link>
-        )}
 
         {/* Settings */}
         <Link
