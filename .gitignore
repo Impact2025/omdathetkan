@@ -40,3 +40,6 @@ drizzle/*.sql
 # Old Cloudflare stuff
 .wrangler/
 apps/
+
+.vercel
+.env*.local

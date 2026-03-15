@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { loginWithPincode } from '@/actions/auth';
 
@@ -101,29 +100,15 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-pink-50 via-white to-rose-50">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-50 via-white to-violet-50">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="w-full max-w-sm"
       >
         <div className="glass rounded-3xl p-8">
-          {/* Logo */}
+          {/* Header */}
           <div className="text-center mb-8">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ type: 'spring', delay: 0.2 }}
-              className="w-48 h-48 mx-auto mb-6 relative"
-            >
-              <Image
-                src="/logo.png"
-                alt="Logo"
-                fill
-                className="object-contain"
-                priority
-              />
-            </motion.div>
             <p className="text-gray-500 mt-2">Voer je pincode in</p>
           </div>
 

@@ -1,7 +1,7 @@
 {
-  "name": "PUUR",
-  "short_name": "PUUR",
-  "description": "Private messaging app voor koppels",
+  "name": "Bonnen",
+  "short_name": "Bonnen",
+  "description": "Bonnen en notities beheren",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#fdf2f8",

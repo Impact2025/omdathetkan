@@ -2,17 +2,18 @@ import type { Metadata, Viewport } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ServiceWorkerRegistration } from '@/components/ServiceWorkerRegistration';
+import { AutoLock } from '@/components/AutoLock';
 
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'PUUR',
-  description: 'Private messaging app voor koppels',
+  title: 'Bonnen',
+  description: 'Bonnen en notities beheren',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'PUUR',
+    title: 'Bonnen',
   },
 };
 
@@ -33,6 +34,7 @@ export default function RootLayout({
     <html lang="nl">
       <body className={inter.className}>
         <ServiceWorkerRegistration />
+        <AutoLock />
         {children}
       </body>
     </html>
