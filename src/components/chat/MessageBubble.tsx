@@ -3,8 +3,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { clsx } from 'clsx';
-import { format } from 'date-fns';
-import { nl } from 'date-fns/locale';
 import type { Message, User, Reaction } from '@/db/schema';
 
 interface MessageWithSender extends Message {
@@ -186,20 +184,14 @@ export function MessageBubble({ message, isSent }: MessageBubbleProps) {
           </div>
         )}
 
-        {/* Timestamp */}
-        <div
-          className={clsx(
-            'flex items-center gap-1 text-xs text-gray-500',
-            isSent ? 'justify-end' : 'justify-start'
-          )}
-        >
-          <span>{format(new Date(message.createdAt), 'HH:mm', { locale: nl })}</span>
-          {isSent && (
-            <span className={clsx(message.readAt && 'text-primary-500')}>
+        {/* Read indicator */}
+        {isSent && (
+          <div className="flex justify-end">
+            <span className={clsx('text-xs', message.readAt ? 'text-primary-500' : 'text-gray-400')}>
               {message.readAt ? '✓✓' : '✓'}
             </span>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </motion.div>
   );
