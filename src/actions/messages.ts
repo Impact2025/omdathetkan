@@ -115,9 +115,9 @@ export async function sendMessage(data: {
   // Broadcast via Pusher
   const pusher = getPusherServer();
   if (pusher) {
-    await pusher.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_NEW, {
+    pusher.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_NEW, {
       message: messageWithSender,
-    });
+    }).catch((err: unknown) => console.error('Pusher trigger failed:', err));
   }
 
   // Send push notification to partner
@@ -144,10 +144,33 @@ export async function markAsRead(messageId: string) {
 
   const pusher = getPusherServer();
   if (pusher) {
-    await pusher.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_READ, {
+    pusher.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_READ, {
       messageId,
       readAt: new Date(),
-    });
+    }).catch((err: unknown) => console.error('Pusher trigger failed:', err));
+  }
+}
+
+export async function deleteMessage(messageId: string) {
+  const { user } = await requireAuth();
+  const couple = await getUserCouple(user.id);
+
+  if (!couple) throw new Error('Geen couple gevonden');
+
+  const [message] = await db
+    .select()
+    .from(messages)
+    .where(and(eq(messages.id, messageId), eq(messages.coupleId, couple.id)));
+
+  if (!message) throw new Error('Bericht niet gevonden');
+
+  await db.delete(messages).where(eq(messages.id, messageId));
+
+  const pusher = getPusherServer();
+  if (pusher) {
+    pusher.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_DELETE, {
+      messageId,
+    }).catch((err: unknown) => console.error('Pusher trigger failed:', err));
   }
 }
 
@@ -175,10 +198,10 @@ export async function addReaction(messageId: string, emoji: string) {
 
   const pusher = getPusherServer();
   if (pusher) {
-    await pusher.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_REACTION, {
+    pusher.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGE_REACTION, {
       messageId,
       reaction,
-    });
+    }).catch((err: unknown) => console.error('Pusher trigger failed:', err));
   }
 
   return { reaction };
@@ -192,11 +215,11 @@ export async function sendTypingIndicator(isTyping: boolean) {
 
   const pusher = getPusherServer();
   if (pusher) {
-    await pusher.trigger(
+    pusher.trigger(
       getCoupleChannel(couple.id),
       isTyping ? EVENTS.TYPING_START : EVENTS.TYPING_STOP,
       { userId: user.id }
-    );
+    ).catch((err: unknown) => console.error('Pusher trigger failed:', err));
   }
 }
 

@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPusherClient, EVENTS, getCoupleChannel } from '@/lib/pusher';
-import { sendMessage, markAsRead, sendTypingIndicator } from '@/actions/messages';
+import { sendMessage, markAsRead, sendTypingIndicator, deleteMessage } from '@/actions/messages';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 import { ChatHeader } from './ChatHeader';
@@ -95,6 +95,10 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
       );
     });
 
+    channel.bind(EVENTS.MESSAGE_DELETE, (data: { messageId: string }) => {
+      setMessages((prev) => prev.filter((m) => m.id !== data.messageId));
+    });
+
     channel.bind(EVENTS.TYPING_START, (data: { userId: string }) => {
       if (data.userId !== currentUser.id) {
         setIsPartnerTyping(true);
@@ -149,6 +153,15 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
     }
   };
 
+  const handleDelete = async (messageId: string) => {
+    try {
+      await deleteMessage(messageId);
+      setMessages((prev) => prev.filter((m) => m.id !== messageId));
+    } catch (error) {
+      console.error('Failed to delete message:', error);
+    }
+  };
+
   const handleTyping = () => {
     sendTypingIndicator(true);
   };
@@ -169,6 +182,7 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
               key={message.id}
               message={message}
               isSent={message.senderId === currentUser.id}
+              onDelete={handleDelete}
             />
           ))}
         </AnimatePresence>

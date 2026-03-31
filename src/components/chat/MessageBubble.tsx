@@ -13,12 +13,19 @@ interface MessageWithSender extends Message {
 interface MessageBubbleProps {
   message: MessageWithSender;
   isSent: boolean;
+  onDelete?: (messageId: string) => void;
 }
 
-export function MessageBubble({ message, isSent }: MessageBubbleProps) {
+export function MessageBubble({ message, isSent, onDelete }: MessageBubbleProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [imageFailed, setImageFailed] = useState(false);
   const [showLightbox, setShowLightbox] = useState(false);
+  const [showDelete, setShowDelete] = useState(false);
+
+  const timeString = new Date(message.createdAt).toLocaleTimeString('nl-NL', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 
   const renderContent = () => {
     switch (message.messageType) {
@@ -149,6 +156,7 @@ export function MessageBubble({ message, isSent }: MessageBubbleProps) {
         'flex items-end gap-2 max-w-[85%]',
         isSent ? 'ml-auto flex-row-reverse' : 'mr-auto'
       )}
+      onContextMenu={(e) => { e.preventDefault(); setShowDelete((v) => !v); }}
     >
       {!isSent && (
         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-secondary-500 flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
@@ -184,14 +192,23 @@ export function MessageBubble({ message, isSent }: MessageBubbleProps) {
           </div>
         )}
 
-        {/* Read indicator */}
-        {isSent && (
-          <div className="flex justify-end">
+        {/* Time + read indicator */}
+        <div className={clsx('flex items-center gap-1', isSent ? 'justify-end' : 'justify-start')}>
+          <span className="text-xs text-gray-400">{timeString}</span>
+          {isSent && (
             <span className={clsx('text-xs', message.readAt ? 'text-primary-500' : 'text-gray-400')}>
               {message.readAt ? '✓✓' : '✓'}
             </span>
-          </div>
-        )}
+          )}
+          {showDelete && onDelete && (
+            <button
+              onClick={() => { onDelete(message.id); setShowDelete(false); }}
+              className="text-xs text-red-400 hover:text-red-600 ml-1"
+            >
+              verwijder
+            </button>
+          )}
+        </div>
       </div>
     </motion.div>
   );
