@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 const INACTIVITY_TIMEOUT = 5 * 60 * 1000; // 5 minuten
 
 export function useAutoLock() {
-  const [isLocked, setIsLocked] = useState(false);
+  const [isLocked, setIsLocked] = useState(true);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const resetTimer = useCallback(() => {
