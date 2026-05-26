@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getPusherClient, EVENTS, getCoupleChannel } from '@/lib/pusher';
-import { sendMessage, markAsRead, sendTypingIndicator, deleteMessage } from '@/actions/messages';
+import { sendMessage, markAsRead, sendTypingIndicator, deleteMessage, archiveAllMessages } from '@/actions/messages';
 import { MessageBubble } from './MessageBubble';
 import { MessageInput } from './MessageInput';
 import { ChatHeader } from './ChatHeader';
@@ -33,6 +33,7 @@ interface ChatClientProps {
 export function ChatClient({ initialMessages, currentUser, couple }: ChatClientProps) {
   const [messages, setMessages] = useState<MessageWithSender[]>(initialMessages);
   const [isPartnerTyping, setIsPartnerTyping] = useState(false);
+  const [isArchiving, setIsArchiving] = useState(false);
 
   // Determine initial online status based on lastSeen
   const getInitialOnlineStatus = () => {
@@ -97,6 +98,10 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
 
     channel.bind(EVENTS.MESSAGE_DELETE, (data: { messageId: string }) => {
       setMessages((prev) => prev.filter((m) => m.id !== data.messageId));
+    });
+
+    channel.bind(EVENTS.MESSAGES_ARCHIVED, () => {
+      setMessages([]);
     });
 
     channel.bind(EVENTS.TYPING_START, (data: { userId: string }) => {
@@ -166,6 +171,19 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
     sendTypingIndicator(true);
   };
 
+  const handleArchiveAll = async () => {
+    if (!confirm('Wil je alle berichten archiveren?')) return;
+    setIsArchiving(true);
+    try {
+      await archiveAllMessages();
+      setMessages([]);
+    } catch (error) {
+      console.error('Archiveren mislukt:', error);
+    } finally {
+      setIsArchiving(false);
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-gradient-to-br from-pink-50 via-white to-rose-50">
       <ChatHeader
@@ -206,6 +224,18 @@ export function ChatClient({ initialMessages, currentUser, couple }: ChatClientP
 
         <div ref={messagesEndRef} />
       </div>
+
+      {currentUser.email === 'vincent@pureliefde.nl' && (
+        <div className="px-4 pb-1 flex justify-end">
+          <button
+            onClick={handleArchiveAll}
+            disabled={isArchiving || messages.length === 0}
+            className="text-xs text-gray-400 hover:text-gray-600 disabled:opacity-30 transition-colors"
+          >
+            {isArchiving ? 'Archiveren...' : 'Alles archiveren'}
+          </button>
+        </div>
+      )}
 
       <MessageInput
         onSendMessage={handleSendMessage}

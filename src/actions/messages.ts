@@ -1,6 +1,6 @@
 'use server';
 
-import { eq, or, desc, lt, and, isNull, isNotNull } from 'drizzle-orm';
+import { eq, or, desc, lt, and, isNull, isNotNull, lte } from 'drizzle-orm';
 import { db, messages, users, reactions, couples } from '@/db';
 import { requireAuth } from '@/lib/auth';
 import { getPusherServer, EVENTS, getCoupleChannel } from '@/lib/pusher';
@@ -280,6 +280,45 @@ export async function sendOfflinePresence(userId: string, coupleId: string) {
       isOnline: false,
       lastSeen: new Date().toISOString(),
     });
+  }
+}
+
+export async function archiveAllMessages(upToMessageId?: string) {
+  const { user } = await requireAuth();
+
+  if (user.email !== 'vincent@pureliefde.nl') {
+    throw new Error('Geen toegang');
+  }
+
+  const couple = await getUserCouple(user.id);
+  if (!couple) throw new Error('Geen couple gevonden');
+
+  let cutoffDate = new Date();
+
+  if (upToMessageId) {
+    const [targetMessage] = await db
+      .select()
+      .from(messages)
+      .where(and(eq(messages.id, upToMessageId), eq(messages.coupleId, couple.id)));
+    if (targetMessage) {
+      cutoffDate = targetMessage.createdAt;
+    }
+  }
+
+  await db
+    .update(messages)
+    .set({ archivedAt: new Date() })
+    .where(and(
+      eq(messages.coupleId, couple.id),
+      isNull(messages.archivedAt),
+      lte(messages.createdAt, cutoffDate)
+    ));
+
+  const pusher = getPusherServer();
+  if (pusher) {
+    pusher.trigger(getCoupleChannel(couple.id), EVENTS.MESSAGES_ARCHIVED, {}).catch(
+      (err: unknown) => console.error('Pusher trigger failed:', err)
+    );
   }
 }
 

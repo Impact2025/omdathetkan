@@ -63,6 +63,7 @@ export const EVENTS = {
   TYPING_STOP: 'typing:stop',
   PRESENCE_UPDATE: 'presence:update',
   MESSAGE_DELETE: 'message:delete',
+  MESSAGES_ARCHIVED: 'messages:archived',
   DATE_NEW: 'date:new',
   DATE_UPDATE: 'date:update',
   DATE_DELETE: 'date:delete',
